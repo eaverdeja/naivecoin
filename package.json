@@ -1,0 +1,35 @@
+{
+  "name": "naivecoin",
+  "version": "1.0.0",
+  "description": "An implementation of the naivecoin blockchain project https://github.com/lhartikk/naivecoin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eaverdeja/naivecoin.git"
+  },
+  "keywords": [
+    "blockchain",
+    "cryptocurrency",
+    "tutorial",
+    "DIY"
+  ],
+  "author": "Eduardo Verdeja",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eaverdeja/naivecoin/issues"
+  },
+  "homepage": "https://github.com/eaverdeja/naivecoin#readme",
+  "devDependencies": {
+    "@types/express": "^4.11.1",
+    "@types/node": "^9.4.7",
+    "i": "^0.3.6",
+    "ts-node": "^5.0.1",
+    "tslint-config-airbnb": "^5.7.0"
+  },
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}

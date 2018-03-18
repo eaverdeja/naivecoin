@@ -1,6 +1,7 @@
-import * as WebSocket from 'ws'
+import WebSocket from 'ws'
 import {Server} from 'ws'
-import {addBlockToChain, Block, getBlockchain, getLatestBlock, isValidBlockStructure, replaceChain} from './blockchain'
+import {addBlockToChain, Block, getBlockchain, getLatestBlock, replaceChain} from './blockchain'
+import { isValidBlockStructure } from './validator'
 
 const sockets: WebSocket[] = []
 

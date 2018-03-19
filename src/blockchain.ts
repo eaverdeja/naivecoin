@@ -1,5 +1,5 @@
 import { broadcastLatest } from './p2p'
-import { calculateHash } from './utils'
+import { calculateHash } from './hasher'
 import { isValidBlockStructure, isValidNewBlock, isValidChain } from './validator'
 
 class Block {

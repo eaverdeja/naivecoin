@@ -1,6 +1,6 @@
-export const getCurrentTimestamp = (): number => Math.round(new Date().getTime() / 1000)
+const getCurrentTimestamp = (): number => Math.round(new Date().getTime() / 1000)
 
-export const hexToBinary = (s: string): string | null => {
+const hexToBinary = (s: string): string | null => {
     let ret: string = ''
     const lookupTable = {
         '0': '0000', '1': '0001', '2': '0010', '3': '0011', '4': '0100',
@@ -18,3 +18,13 @@ export const hexToBinary = (s: string): string | null => {
     return ret
 }
 
+const toHexString = (byteArray): string =>
+    Array.from(byteArray, (byte: any) =>
+        ('0' + (byte & 0xFF).toString(16)).slice(-2)
+    ).join('')
+
+export {
+    getCurrentTimestamp,
+    hexToBinary,
+    toHexString
+}

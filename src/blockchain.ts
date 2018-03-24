@@ -1,6 +1,7 @@
 import { broadcastLatest } from './p2p/messenger'
 import { calculateHash } from './hasher'
-import { isValidBlockStructure, isValidNewBlock, isValidChain } from './validator'
+import { isValidBlockStructure, isValidNewBlock } from './validators/block.validator'
+import { isValidChain } from './validators/pow.validator'
 import { getDifficulty } from './pow';
 
 class Block {

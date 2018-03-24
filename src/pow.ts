@@ -1,6 +1,6 @@
 import { Block, getBlockchain } from "./blockchain"
 import { calculateHash } from "./hasher"
-import { hashMatchesDifficulty } from "./validator"
+import { hashMatchesDifficulty } from "./validators/pow.validator"
 
 // in seconds
 export const BLOCK_GENERATION_INTERVAL: number = 10

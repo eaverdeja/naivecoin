@@ -21,7 +21,7 @@ class UnspentTxOut {
         this.txOutIndex = txOutIndex
         this.address = address
         this.amount = amount
-    }action
+    }
 }
 
 const findUnspentTxOut = (transactionId: string, index: number, aUnspentTxOuts: UnspentTxOut[]): UnspentTxOut | null =>
@@ -55,5 +55,6 @@ const updateUnspentTxOuts = (newTransactions: Transaction[], aUnspentTxOuts: Uns
 export {
     TxOut,
     UnspentTxOut,
-    findUnspentTxOut
+    findUnspentTxOut,
+    updateUnspentTxOuts
 }

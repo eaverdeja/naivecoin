@@ -89,10 +89,10 @@ const validateCoinbaseTransaction = (transaction: Transaction, blockIndex: numbe
 }
 
 const validateTxIn = (txIn: TxIn, transaction: Transaction, aUnspentTxOuts: UnspentTxOut[]): boolean => {
-    const referencedUTxOut: UnspentTxOut =
-        aUnspentTxOuts.find((uTxO) =>
-            uTxO.txOutId === txIn.txOutId
-            && uTxO.txOutIndex === txIn.txOutIndex)
+    const referencedUTxOut =
+        aUnspentTxOuts.find(uTxO =>
+            uTxO.txOutId === txIn.txOutId && uTxO.txOutIndex === txIn.txOutIndex
+        ) || null
     
     if(referencedUTxOut == null) {
         console.log('referenced txOut not found: ' + JSON.stringify(txIn, null, 3))
@@ -108,6 +108,7 @@ const validateTxIn = (txIn: TxIn, transaction: Transaction, aUnspentTxOuts: Unsp
 const isValidTxInStructure =(txIn: TxIn): boolean => {
     if(txIn == null) {
         console.log('txIn is null')
+        return false
     } else if (typeof txIn.signature !== 'string') {
         console.log('invalid signature type in txIn')
         return false
@@ -139,6 +140,12 @@ const isValidTxOutStructure = (txOut: TxOut): boolean => {
     } else {
         return true
     }
+}
+
+const isValidTransactionsStructure = (transactions: Transaction[]): boolean => {
+    return transactions
+        .map(isValidTransactionStructure)
+        .reduce((a, b) => (a && b), true)
 }
 
 const isValidTransactionStructure = (transaction: Transaction) => {
@@ -187,4 +194,9 @@ const isValidAddress = (address: string): boolean => {
     }
     
     return true
+}
+
+export {
+    isValidTransactionsStructure,
+    validateBlockTransactions
 }

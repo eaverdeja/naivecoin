@@ -69,5 +69,6 @@ const hasDuplicates = (txIns: TxIn[]): boolean => {
 export {
     TxIn,
     getTxInAmount,
-    hasDuplicates
+    hasDuplicates,
+    getPublicKey
 }

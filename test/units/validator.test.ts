@@ -6,11 +6,14 @@ describe('Validator', () => {
     let block: Block
     beforeEach(() => {
         block = getGenesisBlock()
+        console.log(block)
+        return true
     })
 
     describe('isValidBlockStructure', () => {
         it('Validates a valid block', () =>
-            expect(isValidBlockStructure(block)).to.equal(true))
+            expect(isValidBlockStructure(block)).to.equal(true)
+        )
 
         it('Invalidates a block without data', () => {
             block.data = null

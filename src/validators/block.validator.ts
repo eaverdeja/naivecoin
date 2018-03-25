@@ -1,6 +1,5 @@
 import { Block } from '../blockchain'
-import { calculateHash, calculateHashForBlock } from '../hasher'
-import { getCurrentTimestamp } from '../utils'
+import { getCurrentTimestamp, calculateHash, calculateHashForBlock } from '../utils'
 import { hashMatchesDifficulty } from './pow.validator'
 
 const isValidBlockStructure = (block: Block): boolean => {

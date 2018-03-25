@@ -1,4 +1,4 @@
-import { Transaction } from "../transaction"
+import { Transaction } from "./transaction"
 
 class TxOut {
     public address: string

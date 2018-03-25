@@ -1,10 +1,10 @@
 import { broadcastLatest } from './p2p/messenger'
-import { calculateHash } from './hasher'
+import { calculateHash } from './utils'
 import { isValidBlockStructure, isValidNewBlock } from './validators/block.validator'
 import { isValidChain } from './validators/pow.validator'
 import { getDifficulty, findBlock } from './pow';
 import { getCoinbaseTransaction } from './transactions/transaction.coinbase';
-import { Transaction, createTransaction, processTransactions } from './transaction';
+import { Transaction, createTransaction, processTransactions } from './transactions/transaction';
 import { getPublicFromWallet, getPrivateFromWallet, getBalance } from './wallet';
 import { UnspentTxOut } from './transactions/transaction.out';
 import { isValidAddress } from './validators/transaction.validator';

@@ -1,8 +1,8 @@
 import * as CryptoJS from 'crypto-js'
-import { TxOut, UnspentTxOut, findUnspentTxOut, updateUnspentTxOuts } from './transactions/transaction.out'
-import { TxIn, getPublicKey, signTxIn } from './transactions/transaction.in'
-import { isValidTransactionsStructure, validateBlockTransactions } from './validators/transaction.validator'
-import { findTxOutsForAmount, createTxOuts } from './wallet';
+import { TxOut, UnspentTxOut, findUnspentTxOut, updateUnspentTxOuts } from './transaction.out'
+import { TxIn, getPublicKey, signTxIn } from './transaction.in'
+import { isValidTransactionsStructure, validateBlockTransactions } from '../validators/transaction.validator'
+import { findTxOutsForAmount, createTxOuts } from '../wallet';
 
 class Transaction {
     public id: string

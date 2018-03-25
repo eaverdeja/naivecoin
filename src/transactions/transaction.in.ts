@@ -2,7 +2,7 @@ import * as ecdsa from 'elliptic'
 import _ from 'lodash'
 import { toHexString } from '../utils'
 import { findUnspentTxOut, UnspentTxOut } from './transaction.out';
-import { Transaction } from '../transaction'
+import { Transaction } from './transaction'
 
 const ec = new ecdsa.ec('secp256k1')
 
@@ -62,6 +62,7 @@ const hasDuplicates = (txIns: TxIn[]): boolean => {
                 return false
             }
         })
+        .value()
         
     return _.includes(groups, true)
 }

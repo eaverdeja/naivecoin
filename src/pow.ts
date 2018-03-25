@@ -1,15 +1,15 @@
 import { Block, getBlockchain } from "./blockchain"
-import { calculateHash } from "./hasher"
+import { calculateHash } from "./utils"
 import { hashMatchesDifficulty } from "./validators/pow.validator"
-import { Transaction } from "./transaction";
+import { Transaction } from "./transactions/transaction";
 
 // in seconds
-export const BLOCK_GENERATION_INTERVAL: number = 10
+const BLOCK_GENERATION_INTERVAL: number = 10
 
 // in blocks
-export const DIFFICULTY_ADJUSTMENT_INTERVAL: number = 10
+const DIFFICULTY_ADJUSTMENT_INTERVAL: number = 10
 
-export const getDifficulty = (aBlockchain: Block[]): number => {
+const getDifficulty = (aBlockchain: Block[]): number => {
     const latestBlock: Block = aBlockchain[getBlockchain().length - 1]
 
     if (latestBlock.index % DIFFICULTY_ADJUSTMENT_INTERVAL === 0 && latestBlock.index !== 0) {
@@ -19,7 +19,7 @@ export const getDifficulty = (aBlockchain: Block[]): number => {
     }
 }
 
-export const getAdjustedDifficulty = (latestBlock: Block, aBlockchain: Block[]) => {
+const getAdjustedDifficulty = (latestBlock: Block, aBlockchain: Block[]) => {
     const prevAdjustmentBlock: Block = aBlockchain[getBlockchain().length - DIFFICULTY_ADJUSTMENT_INTERVAL]
     const timeExpected: number = BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL
     const timeTaken: number = latestBlock.timestamp - prevAdjustmentBlock.timestamp
@@ -46,5 +46,9 @@ const findBlock = (index: number, previousHash: string, timestamp: number, data:
 }
 
 export {
+    BLOCK_GENERATION_INTERVAL,
+    DIFFICULTY_ADJUSTMENT_INTERVAL,
+    getDifficulty,
+    getAdjustedDifficulty,
     findBlock
 }

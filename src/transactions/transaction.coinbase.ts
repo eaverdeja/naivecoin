@@ -1,4 +1,4 @@
-import { Transaction, getTransactionId } from "../transaction"
+import { Transaction, getTransactionId } from "./transaction"
 import { TxIn } from "./transaction.in"
 import { TxOut } from "./transaction.out"
 

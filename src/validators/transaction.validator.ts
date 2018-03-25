@@ -1,4 +1,4 @@
-import { Transaction, getTransactionId } from '../transaction'
+import { Transaction, getTransactionId } from '../transactions/transaction'
 import { TxOut, UnspentTxOut } from '../transactions/transaction.out'
 import { TxIn, getTxInAmount, hasDuplicates } from '../transactions/transaction.in'
 import { COINBASE_AMOUNT, getCoinbaseTransaction } from '../transactions/transaction.coinbase'
@@ -124,7 +124,6 @@ const isValidTxInStructure =(txIn: TxIn): boolean => {
     }
 }
 
-
 const isValidTxOutStructure = (txOut: TxOut): boolean => {
     if (txOut == null) {
         console.log('txOut is null')
@@ -149,7 +148,7 @@ const isValidTransactionsStructure = (transactions: Transaction[]): boolean => {
         .reduce((a, b) => (a && b), true)
 }
 
-const isValidTransactionStructure = (transaction: Transaction) => {
+const isValidTransactionStructure = (transaction: Transaction): boolean => {
     if(typeof transaction.id !== 'string') {
         console.log('transactionId missing')
         return false

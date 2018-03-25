@@ -3,7 +3,7 @@ import { ec } from 'elliptic'
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { getPublicKey, TxIn, signTxIn } from './transactions/transaction.in'
 import { UnspentTxOut, TxOut } from './transactions/transaction.out'
-import { Transaction, getTransactionId } from './transaction';
+import { Transaction, getTransactionId } from './transactions/transaction';
 
 const privateKeyLocation = 'node/wallet/private_key'
 

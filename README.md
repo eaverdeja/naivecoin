@@ -35,12 +35,6 @@ Esse fork tem alguns objetivos
         - definição de endpoints HTTP para interagir com uma blockchain
 - test/
     - diretório de testes automatizados
-- .gitignore
-- README.md
-- package-lock.json
-- package.json
-- tsconfig.json
-- tslint.json
 
 ## tutorial traduzido
 //todo

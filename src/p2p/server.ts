@@ -1,7 +1,7 @@
 import WebSocket from 'ws'
 import {Server} from 'ws'
 import {addBlockToChain, Block, getBlockchain, getLatestBlock, replaceChain} from '../blockchain'
-import { isValidBlockStructure } from '../validator'
+import { isValidBlockStructure } from '../validators/block.validator'
 import { Message, MessageType, write, broadcast, queryChainLengthMsg, responseLatestMsg, responseChainMsg, queryAllMsg } from './messenger';
 
 const sockets: WebSocket[] = []

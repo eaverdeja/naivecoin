@@ -1,5 +1,5 @@
 import * as ecdsa from 'elliptic'
-import * as _ from 'lodash'
+import _ from 'lodash'
 import { toHexString } from '../utils'
 import { findUnspentTxOut, UnspentTxOut } from './transaction.out';
 import { Transaction } from '../transaction'
@@ -37,7 +37,7 @@ const signTxIn = (transaction: Transaction, txInIndex: number,
         throw Error()
     }
 
-    const key = ec.keyFromPrivateKey(privateKey, 'hex')
+    const key = ec.keyFromPrivate(privateKey, 'hex')
     const signature: string = toHexString(key.sign(dataToSign).toDER())
 
     return signature
@@ -53,8 +53,7 @@ const getTxInAmount = (txIn: TxIn, aUnspentTxOuts: UnspentTxOut[]): number => {
 }
 
 const hasDuplicates = (txIns: TxIn[]): boolean => {
-    const groups = _.countBy(txIns, (txIn) => txIn.txOutId + txIn.txOutIndex)
-    return _(groups)
+    const groups = _(txIns).countBy((txIn) => txIn.txOutId + txIn.txOutIndex)
         .map((value, key) => {
             if(value > 1) {
                 console.log('duplicate txIn: ' + key)
@@ -63,12 +62,14 @@ const hasDuplicates = (txIns: TxIn[]): boolean => {
                 return false
             }
         })
-        .includes(true)
+        
+    return _.includes(groups, true)
 }
 
 export {
     TxIn,
     getTxInAmount,
     hasDuplicates,
-    getPublicKey
+    getPublicKey,
+    signTxIn
 }

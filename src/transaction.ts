@@ -1,7 +1,8 @@
 import * as CryptoJS from 'crypto-js'
 import { TxOut, UnspentTxOut, findUnspentTxOut, updateUnspentTxOuts } from './transactions/transaction.out'
-import { TxIn } from './transactions/transaction.in'
+import { TxIn, getPublicKey, signTxIn } from './transactions/transaction.in'
 import { isValidTransactionsStructure, validateBlockTransactions } from './validators/transaction.validator'
+import { findTxOutsForAmount, createTxOuts } from './wallet';
 
 class Transaction {
     public id: string
@@ -21,6 +22,36 @@ const getTransactionId = (transaction: Transaction): string => {
     return CryptoJS.SHA256(txInContent + txOutContent).toString()
 }
 
+const createTransaction = (receiverAddress: string, amount: number,
+    privateKey: string, unspentTxOuts: UnspentTxOut[]): Transaction => {
+
+    const myAddress: string = getPublicKey(privateKey)
+    const myUnspentTxOuts = unspentTxOuts.filter((uTxO: UnspentTxOut) => uTxO.address === myAddress)
+
+    const {includedUnspentTxOuts, leftOverAmount} = findTxOutsForAmount(amount, myUnspentTxOuts)
+
+    const toUnsignedTxIn = (unspentTxOut: UnspentTxOut) => {
+        const txIn: TxIn = new TxIn()
+        txIn.txOutId = unspentTxOut.txOutId
+        txIn.txOutIndex = unspentTxOut.txOutIndex
+        return txIn
+    }
+
+    const unsignedTxIns: TxIn[] = includedUnspentTxOuts.map(toUnsignedTxIn)
+
+    const tx: Transaction = new Transaction()
+    tx.txIns = unsignedTxIns
+    tx.txOuts = createTxOuts(receiverAddress, myAddress, amount, leftOverAmount)
+    tx.id = getTransactionId(tx)
+
+    tx.txIns = tx.txIns.map((txIn: TxIn, index: number) => {
+        txIn.signature = signTxIn(tx, index, privateKey, unspentTxOuts)
+        return txIn
+    })
+
+    return tx
+}
+
 const processTransactions = (aTransactions: Transaction[], aUnspentTxOuts: UnspentTxOut[], blockIndex: number) => {
     if(!isValidTransactionsStructure(aTransactions)) {
         return null
@@ -34,8 +65,9 @@ const processTransactions = (aTransactions: Transaction[], aUnspentTxOuts: Unspe
     return updateUnspentTxOuts(aTransactions, aUnspentTxOuts)
 }
 
-
 export {
     Transaction,
-    getTransactionId
+    getTransactionId,
+    createTransaction,
+    processTransactions,
 }

@@ -1,14 +1,14 @@
 import { Block } from '../blockchain'
 import { calculateHash, calculateHashForBlock } from '../hasher'
 import { getCurrentTimestamp } from '../utils'
-import { hashMatchesDifficulty } from './powValidator'
+import { hashMatchesDifficulty } from './pow.validator'
 
 const isValidBlockStructure = (block: Block): boolean => {
     return typeof block.index === 'number'
         && typeof block.hash === 'string'
         && typeof block.previousHash === 'string'
         && typeof block.timestamp === 'number'
-        && typeof block.data === 'string'
+        && typeof block.data === 'object'
 }
 
 const isValidTimestamp = (newBlock: Block, previousBlock: Block): boolean => {

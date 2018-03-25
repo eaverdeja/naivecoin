@@ -3,16 +3,17 @@ import { TxOut, UnspentTxOut } from '../transactions/transaction.out'
 import { TxIn, getTxInAmount, hasDuplicates } from '../transactions/transaction.in'
 import { COINBASE_AMOUNT, getCoinbaseTransaction } from '../transactions/transaction.coinbase'
 import * as ecdsa from 'elliptic'
+import _ from 'lodash'
 
 const ec = new ecdsa.ec('secp256k1')
 
 const validateBlockTransactions = (aTransactions: Transaction[], aUnspentTxOuts: UnspentTxOut[], blockIndex: number): boolean => {
     const coinbaseTx = aTransactions[0]
     if(!validateCoinbaseTransaction(coinbaseTx, blockIndex)) {
-        console.log('invalid coinbase transaction: ' + JSON.stringify(coinbaseTx))
+        console.log('invalid coinbase transaction: ' + JSON.stringify(coinbaseTx, null, 3))
         return false
     }
-
+    
     const txIns: TxIn[] = _(aTransactions)
         .map(tx => tx.txIns)
         .flatten()
@@ -197,6 +198,7 @@ const isValidAddress = (address: string): boolean => {
 }
 
 export {
+    isValidAddress,
     isValidTransactionsStructure,
     validateBlockTransactions
 }

@@ -1,6 +1,6 @@
 import { Block, getGenesisBlock } from '../blockchain'
 import { hexToBinary } from '../utils'
-import { isValidNewBlock } from './blockValidator'
+import { isValidNewBlock } from './block.validator'
 
 const hashMatchesDifficulty = (hash: string, difficulty: number): boolean => {
     const hashInBinary: string = hexToBinary(hash) || ''

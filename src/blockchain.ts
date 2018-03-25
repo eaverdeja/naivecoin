@@ -2,7 +2,12 @@ import { broadcastLatest } from './p2p/messenger'
 import { calculateHash } from './hasher'
 import { isValidBlockStructure, isValidNewBlock } from './validators/block.validator'
 import { isValidChain } from './validators/pow.validator'
-import { getDifficulty } from './pow';
+import { getDifficulty, findBlock } from './pow';
+import { getCoinbaseTransaction } from './transactions/transaction.coinbase';
+import { Transaction, createTransaction, processTransactions } from './transaction';
+import { getPublicFromWallet, getPrivateFromWallet, getBalance } from './wallet';
+import { UnspentTxOut } from './transactions/transaction.out';
+import { isValidAddress } from './validators/transaction.validator';
 
 class Block {
 
@@ -10,13 +15,13 @@ class Block {
     public hash: string
     public previousHash: string
     public timestamp: number
-    public data: string
+    public data: Transaction[]
     public difficulty: number
     public nonce: number
 
     constructor(
         index: number, hash: string, previousHash: string,
-        timestamp: number, data: string, difficulty: number,
+        timestamp: number, data: Transaction[], difficulty: number,
         nonce: number
     ) {
         this.index = index
@@ -34,7 +39,7 @@ const genesisBlock: Block = new Block(
     '816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7',
     '0',
     1465154705,
-    'my genesis block!!',
+    [],
     0,
     0
 )
@@ -47,21 +52,57 @@ const getGenesisBlock = (): Block => blockchain[0]
 
 const getLatestBlock = (): Block => blockchain[blockchain.length - 1]
 
-const generateNextBlock = (blockData: string) => {
+let unspentTxOuts: UnspentTxOut[] = [];
+
+const getAccountBalance = (): number => {
+    return getBalance(getPublicFromWallet(), unspentTxOuts)
+}
+
+const generateRawNextBlock = (blockData: Transaction[]) => {
     const previousBlock: Block = getLatestBlock()
     const difficulty: number = getDifficulty(getBlockchain());
     const nextIndex: number = previousBlock.index + 1
     const nextTimestamp: number = new Date().getTime() / 1000
-    const nextHash: string = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData, difficulty, 0)
-    const newBlock: Block = new Block(nextIndex, nextHash, previousBlock.hash, nextTimestamp, blockData, difficulty, 0)
-    addBlockToChain(newBlock);
-    broadcastLatest();
-    return newBlock
+    const newBlock = findBlock(nextIndex, previousBlock.hash, nextTimestamp, blockData, difficulty)
+    if(addBlockToChain(newBlock)) {
+        broadcastLatest()
+        return newBlock
+    } else {
+        return null
+    }
+}
+
+const generateNextBlock = () => {
+    const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1)
+    const blockData: Transaction[] = [coinbaseTx]
+    return generateRawNextBlock(blockData)
+}
+
+
+const generateNextBlockWithTransaction = (receiverAddress: string, amount: number) => {
+    if (!isValidAddress(receiverAddress)) {
+        throw Error('invalid address')
+    }
+    if (typeof amount !== 'number') {
+        throw Error('invalid amount')
+    }
+    const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1)
+    const tx: Transaction = createTransaction(receiverAddress, amount, getPrivateFromWallet(), unspentTxOuts)
+    const blockData: Transaction[] = [coinbaseTx, tx]
+    return generateRawNextBlock(blockData)
 }
 
 const addBlockToChain = (newBlock: Block) => {
     if (isValidNewBlock(newBlock, getLatestBlock())) {
+        const uTxO: UnspentTxOut[] | null =
+            processTransactions(newBlock.data, unspentTxOuts, newBlock.index)
+
+        if(uTxO == null) {
+            return false
+        }
+        
         blockchain.push(newBlock)
+        unspentTxOuts = uTxO
         return true
     }
     return false
@@ -82,7 +123,10 @@ export {
     getBlockchain,
     getGenesisBlock,
     getLatestBlock,
+    generateRawNextBlock,
     generateNextBlock,
+    generateNextBlockWithTransaction,
     replaceChain,
-    addBlockToChain
+    addBlockToChain,
+    getAccountBalance
 }

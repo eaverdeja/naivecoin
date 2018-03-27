@@ -13,7 +13,6 @@ class TxIn {
     public txOutId: string
     public txOutIndex: number
     public signature: string
-
 }
 
 const signTxIn = (transaction: Transaction, txInIndex: number,

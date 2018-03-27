@@ -1,13 +1,18 @@
+import _ from 'lodash'
 import { broadcastLatest } from './p2p/messenger'
 import { calculateHash } from './utils'
+
+import { getDifficulty, findBlock } from './pow';
+import { getPublicFromWallet, getPrivateFromWallet, getBalance } from './wallet';
+
+import { getCoinbaseTransaction } from './transactions/transaction.coinbase';
+import { UnspentTxOut } from './transactions/transaction.out'
+import { Transaction, createTransaction, processTransactions } from './transactions/transaction';
+import { updateTransactionPol, getTransactionPool } from './transactions/transaction.pool';
+
 import { isValidBlockStructure, isValidNewBlock } from './validators/block.validator'
 import { isValidChain } from './validators/pow.validator'
-import { getDifficulty, findBlock } from './pow';
-import { getCoinbaseTransaction } from './transactions/transaction.coinbase';
-import { Transaction, createTransaction, processTransactions } from './transactions/transaction';
-import { getPublicFromWallet, getPrivateFromWallet, getBalance } from './wallet';
-import { UnspentTxOut } from './transactions/transaction.out';
-import { isValidAddress } from './validators/transaction.validator';
+import { isValidAddress } from './validators/transaction.validator'
 
 class Block {
 
@@ -34,12 +39,21 @@ class Block {
     }
 }
 
+const genesisTransaction = {
+    txIns: [{'signature': '', 'txOutId': '', 'txOutIndex': 0}],
+    txOuts: [{
+        address: '04c68a65303e8ab0800e9b5703a9b25c0ef901b17f613208c929c48180c92ba480dcb41e4f90f88d9c7078f0a5ce7c8abe7149ffee4c3f6a7090cd50ae0861c427',
+        amount: 50
+    }],
+    id: '666937eb13aa309b8b7ed53c01b22898f772baf9cb3f228309c13caf02179de1'
+}
+
 const genesisBlock: Block = new Block(
     0,
-    '816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7',
+    'some_hash',
     '0',
     1465154705,
-    [],
+    [genesisTransaction],
     0,
     0
 )
@@ -52,11 +66,21 @@ const getGenesisBlock = (): Block => blockchain[0]
 
 const getLatestBlock = (): Block => blockchain[blockchain.length - 1]
 
-let unspentTxOuts: UnspentTxOut[] = [];
+let unspentTxOuts: UnspentTxOut[] = processTransactions(blockchain[0].data, [], 0) || []
 
-const getAccountBalance = (): number => {
-    return getBalance(getPublicFromWallet(), unspentTxOuts)
+const getUnspentTxOuts = (): UnspentTxOut[] =>
+    _.cloneDeep(unspentTxOuts)
+
+const setUnspentTxOuts = (newUnspentTxOuts: UnspentTxOut[]) => {
+    console.log(`replacing unspentTxOuts with:
+        ${JSON.stringify(newUnspentTxOuts, null, 3)}
+    `)
+    unspentTxOuts = newUnspentTxOuts
 }
+
+const getAccountBalance = (): number =>
+    getBalance(getPublicFromWallet(), unspentTxOuts)
+
 
 const generateRawNextBlock = (blockData: Transaction[]) => {
     const previousBlock: Block = getLatestBlock()
@@ -74,10 +98,9 @@ const generateRawNextBlock = (blockData: Transaction[]) => {
 
 const generateNextBlock = () => {
     const coinbaseTx: Transaction = getCoinbaseTransaction(getPublicFromWallet(), getLatestBlock().index + 1)
-    const blockData: Transaction[] = [coinbaseTx]
+    const blockData: Transaction[] = [coinbaseTx].concat(getTransactionPool())
     return generateRawNextBlock(blockData)
 }
-
 
 const generateNextBlockWithTransaction = (receiverAddress: string, amount: number) => {
     if (!isValidAddress(receiverAddress)) {
@@ -97,12 +120,13 @@ const addBlockToChain = (newBlock: Block) => {
         const uTxO: UnspentTxOut[] | null =
             processTransactions(newBlock.data, unspentTxOuts, newBlock.index)
 
-        if(uTxO == null) {
+        if(uTxO === null) {
             return false
         }
         
         blockchain.push(newBlock)
-        unspentTxOuts = uTxO
+        setUnspentTxOuts(uTxO)
+        updateTransactionPol(unspentTxOuts)
         return true
     }
     return false
@@ -128,5 +152,6 @@ export {
     generateNextBlockWithTransaction,
     replaceChain,
     addBlockToChain,
-    getAccountBalance
+    getAccountBalance,
+    getUnspentTxOuts
 }

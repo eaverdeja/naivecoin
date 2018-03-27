@@ -1,9 +1,13 @@
 import * as bodyParser from 'body-parser'
 const express = require('express')
 
-import { Block, generateRawNextBlock, generateNextBlock, getBlockchain, getAccountBalance, generateNextBlockWithTransaction } from './blockchain'
+import { Block, generateRawNextBlock, generateNextBlock, getBlockchain, getAccountBalance, generateNextBlockWithTransaction, getUnspentTxOuts } from './blockchain'
 import { connectToPeers, getSockets, initP2PServer } from './p2p/server'
-import { initWallet } from './wallet';
+import { initWallet, getPublicFromWallet, getMyUnspentTransactionOutputs } from './wallet'
+import { sendTransaction, getTransactionPool } from './transactions/transaction.pool'
+import { formatJSON } from './utils'
+import { UnspentTxOut } from './transactions/transaction.out';
+import _ from 'lodash'
 
 const httpPort: number = parseInt(process.env.HTTP_PORT || '3001')
 const p2pPort: number = parseInt(process.env.P2P_PORT || '6001')
@@ -13,7 +17,15 @@ const initHttpServer = ( myHttpPort: number ) => {
     app.use(bodyParser.json())
 
     app.get('/blocks', (req, res) => {
-        res.send(JSON.stringify(getBlockchain(), null, 3))
+        res.send(formatJSON(getBlockchain()))
+    })
+
+    app.get('/unspentTransactionOutputs', (req, res) => {
+        res.send(formatJSON(getUnspentTxOuts()))
+    })
+
+    app.get('/myUnspentTransactionOutputs', (req, res) => {
+        res.send(getMyUnspentTransactionOutputs())
     })
 
     app.post('/mineRawBlock', (req, res) => {
@@ -25,7 +37,7 @@ const initHttpServer = ( myHttpPort: number ) => {
         if (newBlock === null) {
             res.status(400).send('could not generate block')
         } else {
-            res.send(JSON.stringify(newBlock, null, 3))
+            res.send(formatJSON(newBlock))
         }
     })
 
@@ -34,7 +46,7 @@ const initHttpServer = ( myHttpPort: number ) => {
         if (newBlock === null) {
             res.status(400).send('could not generate block')
         } else {
-            res.send(JSON.stringify(newBlock, null, 3))
+            res.send(formatJSON(newBlock))
         }
     })
 
@@ -43,16 +55,60 @@ const initHttpServer = ( myHttpPort: number ) => {
         res.send({'balance': balance})
     })
 
+    app.get('/address', (req, res) => {
+        const address: string = getPublicFromWallet()
+        res.send(formatJSON({address}))
+    })
+
+    app.get('/block/:hash', (req, res) => {
+        const block = _.find(getBlockchain(), {hash : req.params.hash})
+        res.send(block)
+    })
+
+    app.get('/transaction/:id', (req, res) => {
+        const tx = _(getBlockchain())
+            .map((blocks) => blocks.data)
+            .flatten()
+            .find({'id': req.params.id})
+        res.send(tx)
+    })
+
+    app.get('/address/:address', (req, res) => {
+        const unspentTxOuts: UnspentTxOut[] =
+            _.filter(getUnspentTxOuts(), (uTxO) => uTxO.address === req.params.address)
+        res.send({'unspentTxOuts': unspentTxOuts})
+    })
+
     app.post('/mineTransaction', (req, res) => {
         const address = req.body.address
         const amount = req.body.amount
         try {
             const resp = generateNextBlockWithTransaction(address, amount)
-            res.send(JSON.stringify(resp, null, 3))
+            res.send(formatJSON(resp))
         } catch (e) {
             console.log(e.message)
             res.status(400).send(e.message)
         }
+    })
+
+    app.post('/sendTransaction', (req, res) => {
+        try {
+            const address = req.body.address
+            const amount = req.body.amount
+
+            if (address === undefined || amount === undefined) {
+                throw Error('invalid address or amount')
+            }
+            const resp = sendTransaction(address, amount)
+            res.send(formatJSON(resp))
+        } catch (e) {
+            console.log(e.message)
+            res.status(400).send(e.message)
+        }
+    })
+
+    app.get('/transactionPool', (req, res) => {
+        res.send(formatJSON(getTransactionPool()))
     })
 
     app.get('/peers', (req, res) => {

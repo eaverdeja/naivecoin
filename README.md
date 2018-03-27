@@ -24,7 +24,7 @@ Esse fork tem alguns objetivos
     - validators/
         - regras de validação para blocos, proof-of-work e transações
     - blockchain.ts
-        - define a estrutura de um bloco e todo o fluxo de criação de um bloco e sua inclusão no blockchain
+        - define a estrutura de um bloco, os passos para a criação de um bloco e sua inclusão no blockchain
     - pow.ts
         - define as regras do *proof-of-work*, utilizando constantes para controlar a dificuldade do *puzzle* e o tempo médio de geração de novos blocos
     - wallet.ts

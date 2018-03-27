@@ -1,5 +1,5 @@
 import { Block, getBlockchain } from "./blockchain"
-import { calculateHash } from "./utils"
+import { calculateHash, formatJSON } from "./utils"
 import { hashMatchesDifficulty } from "./validators/pow.validator"
 import { Transaction } from "./transactions/transaction";
 
@@ -39,7 +39,13 @@ const findBlock = (index: number, previousHash: string, timestamp: number, data:
     while (true) {
         const hash: string = calculateHash(index, previousHash, timestamp, data, difficulty, nonce)
         if (hashMatchesDifficulty(hash, difficulty)) {
-            return new Block(index, hash, previousHash, timestamp, data, difficulty, nonce)
+            const block = new Block(index, hash, previousHash, timestamp, data, difficulty, nonce)
+            console.log(`\r\nfound new block at ${new Date(timestamp*1000)}
+                \r\n ----- starting block content
+                \r\n${formatJSON(block)}
+                \r\n ----- ending block content`
+            )
+            return block
         }
         nonce++
     }

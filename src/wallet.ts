@@ -2,8 +2,9 @@ import _ from 'lodash'
 import { ec } from 'elliptic'
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 import { getPublicKey, TxIn, signTxIn } from './transactions/transaction.in'
-import { UnspentTxOut, TxOut } from './transactions/transaction.out'
+import { findUnspentTxOut, UnspentTxOut, TxOut, findUnspentTxOuts } from './transactions/transaction.out'
 import { Transaction, getTransactionId } from './transactions/transaction';
+import { getUnspentTxOuts } from './blockchain';
 
 const privateKeyLocation = 'node/wallet/private_key'
 
@@ -68,6 +69,12 @@ const createTxOuts = (receiverAddress: string, myAddress: string, amount, leftOv
     }
 }
 
+
+// gets the unspent transaction outputs owned by the wallet
+const getMyUnspentTransactionOutputs = () => {
+    return findUnspentTxOuts(getPublicFromWallet(), getUnspentTxOuts())
+}
+
 export {
     generatePrivateKey,
     initWallet,
@@ -76,4 +83,5 @@ export {
     getBalance,
     createTxOuts,
     findTxOutsForAmount,
+    getMyUnspentTransactionOutputs
 }

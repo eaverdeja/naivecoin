@@ -43,8 +43,12 @@ const toHexString = (byteArray): string =>
         ('0' + (byte & 0xFF).toString(16)).slice(-2)
     ).join('')
 
+const formatJSON = (data): string =>
+    JSON.stringify(data, null, 2)
+
 export {
     getCurrentTimestamp,
     hexToBinary,
-    toHexString
+    toHexString,
+    formatJSON
 }

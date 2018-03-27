@@ -3,6 +3,7 @@ import { TxOut, UnspentTxOut, findUnspentTxOut, updateUnspentTxOuts } from './tr
 import { TxIn, getPublicKey, signTxIn } from './transaction.in'
 import { isValidTransactionsStructure, validateBlockTransactions } from '../validators/transaction.validator'
 import { findTxOutsForAmount, createTxOuts } from '../wallet';
+import { getUnspentTxOuts } from '../blockchain';
 
 class Transaction {
     public id: string

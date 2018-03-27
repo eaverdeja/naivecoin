@@ -1,8 +1,11 @@
 import WebSocket from 'ws'
 import {Server} from 'ws'
-import {addBlockToChain, Block, getBlockchain, getLatestBlock, replaceChain} from '../blockchain'
+import {addBlockToChain, Block, getBlockchain, getLatestBlock, replaceChain, getUnspentTxOuts} from '../blockchain'
 import { isValidBlockStructure } from '../validators/block.validator'
-import { Message, MessageType, write, broadcast, queryChainLengthMsg, responseLatestMsg, responseChainMsg, queryAllMsg } from './messenger';
+import { Message, MessageType, write, broadcast, queryChainLatestMsg, responseLatestMsg, responseChainMsg, queryAllMsg, queryTransactionPoolMsg, responseTransactionPool, broadcastTransactionPool } from './messenger'
+import { formatJSON } from '../utils'
+import { Transaction } from '../transactions/transaction';
+import { addToTransactionPool } from '../transactions/transaction.pool';
 
 const sockets: WebSocket[] = []
 const getSockets = () => sockets
@@ -29,33 +32,57 @@ const initConnection = (ws: WebSocket) => {
     sockets.push(ws)
     initMessageHandler(ws)
     initErrorHandler(ws)
-    write(ws, queryChainLengthMsg())
+    write(ws, queryChainLatestMsg())
+
+    setTimeout(() => {
+        broadcast(queryTransactionPoolMsg())
+    }, 500)
 }
 
 const initMessageHandler = (ws: WebSocket) => {
     ws.on('message', (data: string) => {
-        const message: Message = JSONToObject<Message>(data)
-        if (message === null) {
-            console.log('could not parse received JSON message: ' + data)
-            return
-        }
-        console.log('Received message' + JSON.stringify(message, null, 4))
-        switch (message.type) {
-            case MessageType.QUERY_LATEST:
-                write(ws, responseLatestMsg())
-                break
-            case MessageType.QUERY_ALL:
-                write(ws, responseChainMsg())
-                break
-            case MessageType.RESPONSE_BLOCKCHAIN:
-                const receivedBlocks: Block[] = JSONToObject<Block[]>(message.data)
-                if (receivedBlocks === null) {
-                    console.log('invalid blocks received:')
-                    console.log(message.data)
+        try {
+            const message: Message = JSONToObject<Message>(data)
+            if (message === null) {
+                console.log('could not parse received JSON message: ' + data)
+                return
+            }
+            console.log(`Received message: ${formatJSON(message)}`)
+            switch (message.type) {
+                case MessageType.QUERY_LATEST:
+                    write(ws, responseLatestMsg())
                     break
-                }
-                handleBlockchainResponse(receivedBlocks)
-                break
+                case MessageType.QUERY_ALL:
+                    write(ws, responseChainMsg())
+                    break
+                case MessageType.RESPONSE_BLOCKCHAIN:
+                    const receivedBlocks: Block[] = JSONToObject<Block[]>(message.data)
+                    if (receivedBlocks === null) {
+                        console.log(`invalid blocks received: ${message.data}`)
+                        break
+                    }
+                    handleBlockchainResponse(receivedBlocks)
+                    break
+                case MessageType.QUERY_TRANSACTION_POOL:
+                    write(ws, responseTransactionPool())
+                    break
+                case MessageType.RESPONSE_TRANSACTION_POOL:
+                    let receivedTransactions: Transaction[] = []
+                    try {
+                        receivedTransactions = JSONToObject<Transaction[]>(message.data)
+                    } catch(e) {
+                        console.error(`invalid transaction received: ${formatJSON(message.data)}`, e)
+                        break
+                    }
+
+                    receivedTransactions.forEach(transaction => {
+                        handleReceivedTransaction(transaction)
+                        broadcastTransactionPool()
+                    })
+                    break
+            }
+        } catch(e) {
+            console.error(e)
         }
     })
 }
@@ -97,6 +124,10 @@ const handleBlockchainResponse = (receivedBlocks: Block[]) => {
     } else {
         console.log('held blockchain is not longer than received blockchain. Do nothing')
     }
+}
+
+const handleReceivedTransaction = (transaction: Transaction) => {
+    addToTransactionPool(transaction, getUnspentTxOuts())
 }
 
 const JSONToObject = <T>(data: string): T => {

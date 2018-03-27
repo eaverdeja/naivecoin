@@ -196,8 +196,47 @@ const isValidAddress = (address: string): boolean => {
     return true
 }
 
+const isValidTxForPool = (tx: Transaction, aTransactionPool: Transaction[]): boolean => {
+    const getTxPoolIns = (aTransactionPool: Transaction[]): TxIn[] => {
+        return _(aTransactionPool)
+            .map((tx: Transaction) => tx.txIns)
+            .flatten()
+            .value()
+    }
+
+    const txPoolIns: TxIn[] = getTxPoolIns(aTransactionPool)
+
+    const containsTxIn = (txIns: TxIn[], txIn: TxIn) => {
+        return _.find(txPoolIns, ((txPoolIn: TxIn) => {
+            return txIn.txOutId === txPoolIn.txOutId
+                && txIn.txOutIndex === txPoolIn.txOutIndex
+        }))
+    }
+
+    for(const txIn of tx.txIns) {
+        if(containsTxIn(txPoolIns, txIn)) {
+            console.log('txIn already found in the txPool')
+            return false
+        }
+    }
+
+    return true
+}
+
+const hasValidTxIn = (txIn: TxIn, unspentTxOuts: UnspentTxOut[]): boolean => {
+    const foundTxIn = unspentTxOuts.find((uTxO: UnspentTxOut) => {
+        return uTxO.txOutId === txIn.txOutId
+            && uTxO.txOutIndex === txIn.txOutIndex
+    })
+
+    return true
+}
+
 export {
     isValidAddress,
     isValidTransactionsStructure,
-    validateBlockTransactions
+    validateTransaction,
+    validateBlockTransactions,
+    isValidTxForPool,
+    hasValidTxIn
 }

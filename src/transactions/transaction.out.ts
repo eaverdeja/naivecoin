@@ -1,4 +1,5 @@
 import { Transaction } from "./transaction"
+import _ from 'lodash'
 
 class TxOut {
     public address: string
@@ -30,6 +31,9 @@ const findUnspentTxOut = (transactionId: string, index: number, aUnspentTxOuts: 
         && uTxO.txOutIndex === index
     ) || null
 
+const findUnspentTxOuts = (ownerAddress: string, unspentTxOuts: UnspentTxOut[]) => {
+    return _.filter(unspentTxOuts, (uTxO: UnspentTxOut) => uTxO.address === ownerAddress);
+}
 
 const updateUnspentTxOuts = (newTransactions: Transaction[], aUnspentTxOuts: UnspentTxOut[]): UnspentTxOut[] => {
     const newUnspentTxOuts: UnspentTxOut[] = newTransactions
@@ -56,5 +60,6 @@ export {
     TxOut,
     UnspentTxOut,
     findUnspentTxOut,
+    findUnspentTxOuts,
     updateUnspentTxOuts
 }

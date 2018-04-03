@@ -8,7 +8,7 @@ import { getPublicFromWallet, getPrivateFromWallet, getBalance } from './wallet'
 import { getCoinbaseTransaction } from './transactions/transaction.coinbase';
 import { UnspentTxOut } from './transactions/transaction.out'
 import { Transaction, createTransaction, processTransactions } from './transactions/transaction';
-import { updateTransactionPol, getTransactionPool } from './transactions/transaction.pool';
+import { updateTransactionPool, getTransactionPool } from './transactions/transaction.pool';
 
 import { isValidBlockStructure, isValidNewBlock } from './validators/block.validator'
 import { isValidChain } from './validators/pow.validator'
@@ -87,11 +87,15 @@ const generateRawNextBlock = (blockData: Transaction[]) => {
     const difficulty: number = getDifficulty(getBlockchain());
     const nextIndex: number = previousBlock.index + 1
     const nextTimestamp: number = new Date().getTime() / 1000
+    console.log('\r\nLooking for new block!\r\n')
     const newBlock = findBlock(nextIndex, previousBlock.hash, nextTimestamp, blockData, difficulty)
+    console.log('\r\nFound new block! Can we add it?\r\n')
     if(addBlockToChain(newBlock)) {
+        console.log('\r\nYES\r\n')
         broadcastLatest()
         return newBlock
     } else {
+        console.log('\r\nNO\r\n')
         return null
     }
 }
@@ -116,17 +120,19 @@ const generateNextBlockWithTransaction = (receiverAddress: string, amount: numbe
 }
 
 const addBlockToChain = (newBlock: Block) => {
+    console.log('\r\nHEY!!!!!!!\r\n')
     if (isValidNewBlock(newBlock, getLatestBlock())) {
         const uTxO: UnspentTxOut[] | null =
             processTransactions(newBlock.data, unspentTxOuts, newBlock.index)
 
         if(uTxO === null) {
+            console.log('invalid block in regards to its transactions')
             return false
         }
         
         blockchain.push(newBlock)
         setUnspentTxOuts(uTxO)
-        updateTransactionPol(unspentTxOuts)
+        updateTransactionPool(unspentTxOuts)
         return true
     }
     return false

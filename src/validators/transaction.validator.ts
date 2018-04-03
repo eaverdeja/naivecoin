@@ -228,8 +228,7 @@ const hasValidTxIn = (txIn: TxIn, unspentTxOuts: UnspentTxOut[]): boolean => {
         return uTxO.txOutId === txIn.txOutId
             && uTxO.txOutIndex === txIn.txOutIndex
     })
-
-    return true
+    return foundTxIn !== undefined
 }
 
 export {

@@ -11,7 +11,6 @@ import { formatJSON } from '../utils';
 let transactionPool: Transaction[] = []
 
 const getTransactionPool = () => {
-    console.log(transactionPool)
     return _.cloneDeep(transactionPool)
 }
 
@@ -28,7 +27,7 @@ const addToTransactionPool = (tx: Transaction, unspentTxOuts: UnspentTxOut[]) =>
     transactionPool.push(tx)
 }
 
-const updateTransactionPol = (unspentTxOuts: UnspentTxOut[]): void => {
+const updateTransactionPool = (unspentTxOuts: UnspentTxOut[]): void => {
     const invalidTxs: Transaction[] = []
     for(const tx of transactionPool) {
         for(const txIn of tx.txIns) {
@@ -54,6 +53,6 @@ const sendTransaction = (address: string, amount: number): Transaction => {
 export {
     addToTransactionPool,
     getTransactionPool,
-    updateTransactionPol,
+    updateTransactionPool,
     sendTransaction
 }

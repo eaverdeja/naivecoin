@@ -4,10 +4,16 @@ import { isValidNewBlock } from './block.validator'
 import { UnspentTxOut } from '../transactions/transaction.out';
 import { processTransactions } from '../transactions/transaction';
 
-const hashMatchesDifficulty = (hash: string, difficulty: number): boolean => {
+const hashMatchesDifficulty = (hash: string, difficulty: number) => {
     const hashInBinary: string = hexToBinary(hash) || ''
     const requiredPrefix: string = '0'.repeat(difficulty)
-    return hashInBinary.startsWith(requiredPrefix)
+    const match = hashInBinary.startsWith(requiredPrefix)
+
+    return {
+        match,
+        requiredPrefix,
+        hashInBinary
+    }
 }
 
 const isValidChain = (blockchainToValidate: Block[]): UnspentTxOut[] | null => {

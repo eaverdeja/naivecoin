@@ -34,11 +34,14 @@ const getAdjustedDifficulty = (latestBlock: Block, aBlockchain: Block[]) => {
 }
 
 const findBlock = (index: number, previousHash: string, timestamp: number, data: Transaction[], difficulty: number): Block => {
-    let nonce = 0
-    
+    let nonce: number = 0
     while (true) {
         const hash: string = calculateHash(index, previousHash, timestamp, data, difficulty, nonce)
-        if (hashMatchesDifficulty(hash, difficulty)) {
+        const { match, requiredPrefix, hashInBinary } = hashMatchesDifficulty(hash, difficulty)
+
+        logExploration(difficulty, nonce, hashInBinary, match)
+        
+        if (match) {
             const block = new Block(index, hash, previousHash, timestamp, data, difficulty, nonce)
             console.log(`\r\nfound new block at ${new Date(timestamp*1000)}
                 \r\n ----- starting block content
@@ -49,6 +52,14 @@ const findBlock = (index: number, previousHash: string, timestamp: number, data:
         }
         nonce++
     }
+}
+
+const logExploration = (difficulty: number, nonce: number, hashInBinary: string, match: boolean) => {
+    console.log(`\r\ncurrent difficulty: ${'0'.repeat(difficulty)}(s) must prefix the block hash!`)
+    console.log(`\r\ntrying nonce: ${nonce}`)
+    console.log(`\r\ntrying blockhash + nonce (binary): ${hashInBinary}
+    \r\ndoes it match the difficulty? ${(match ? 'yes :) !' : 'no :( ...')}
+`)
 }
 
 export {

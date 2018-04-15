@@ -54,7 +54,7 @@ const genesisBlock: Block = new Block(
     '0',
     1465154705,
     [genesisTransaction],
-    0,
+    4,
     0
 )
 
@@ -87,15 +87,11 @@ const generateRawNextBlock = (blockData: Transaction[]) => {
     const difficulty: number = getDifficulty(getBlockchain());
     const nextIndex: number = previousBlock.index + 1
     const nextTimestamp: number = new Date().getTime() / 1000
-    console.log('\r\nLooking for new block!\r\n')
     const newBlock = findBlock(nextIndex, previousBlock.hash, nextTimestamp, blockData, difficulty)
-    console.log('\r\nFound new block! Can we add it?\r\n')
     if(addBlockToChain(newBlock)) {
-        console.log('\r\nYES\r\n')
         broadcastLatest()
         return newBlock
     } else {
-        console.log('\r\nNO\r\n')
         return null
     }
 }
@@ -120,7 +116,6 @@ const generateNextBlockWithTransaction = (receiverAddress: string, amount: numbe
 }
 
 const addBlockToChain = (newBlock: Block) => {
-    console.log('\r\nHEY!!!!!!!\r\n')
     if (isValidNewBlock(newBlock, getLatestBlock())) {
         const uTxO: UnspentTxOut[] | null =
             processTransactions(newBlock.data, unspentTxOuts, newBlock.index)
